@@ -5,12 +5,12 @@ var app = express();
 var fs = require("fs");
 var ArrayList = require("arraylist");
 const got = require("got");
-var list = new ArrayList();
+var previousValue = "[";
 var request = require("sync-request");
 app.use(bodyParser.json());
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
-var count=1;
+var count = 1;
 app.use(bodyParser.urlencoded({ extended: true }));
 function checkAndNotifyEarthquake() {
   var res = request(
@@ -25,12 +25,12 @@ function checkAndNotifyEarthquake() {
   console.log("\n\n\n\n\n\n\n\n Completed");
 }
 app.listen(process.env.PORT || 3001);
-subCategory();
+checkAndNotifyEarthquake();
 
-function subCategory() {
+function subCategory(element) {
   var url =
     "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-     "http://id.who.int/icd/entity/1435254666" +
+    element.ID +
     "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false";
   var res = request("GET", url);
   var response = JSON.parse(res.getBody().toString());
@@ -153,6 +153,18 @@ function subSubSubSubSubSubSubCategory(element) {
 }
 
 function getDetails(element) {
+  fs.appendFileSync(
+    "response.json",
+    ","+JSON.stringify(previousValue),
+    (err) => {
+      if (err) {
+        console.log("Failed");
+        return;
+      }
+      console.log("Inserted");
+    }
+  );
+  console.log(count++ + " Record Inserted");
   var mItem = {};
   var url =
     "https://icd.who.int/browse11/l-m/en/GetConcept?ConceptId=" + element.ID;
@@ -201,15 +213,8 @@ function getDetails(element) {
   mItem.code = element.label.substr(0, element.label.indexOf(" "));
   mItem.shortDesc = element.label.substr(element.label.indexOf(" ") + 1);
   mItem.DescId = mItem.code.substr(0, element.label.indexOf("."));
-  if(mItem.code.substr(0, element.label.indexOf("."))===""){
-    mItem.DescId =  mItem.code;
+  if (mItem.code.substr(0, element.label.indexOf(".")) === "") {
+    mItem.DescId = mItem.code;
   }
-  list.add(mItem);
-  try {
-    fs.writeFileSync("response.json", JSON.stringify(list), "utf8", (err) => {
-    });
-    console.log(count++ +" Record Inserted");
-  } catch (exce) {
-    console.log(exce);
-  }
+  previousValue = mItem;
 }
