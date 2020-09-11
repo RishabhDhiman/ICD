@@ -1,18 +1,17 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const RxJsObservable = require("rxjs");
 var app = express();
 var fs = require("fs");
-var ArrayList = require("arraylist");
 const got = require("got");
-var previousValue = "[";
 var request = require("sync-request");
 app.use(bodyParser.json());
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
+var ArrayList = require("arraylist");
+var address = new ArrayList();
 var count = 1;
 app.use(bodyParser.urlencoded({ extended: true }));
-function checkAndNotifyEarthquake() {
+/* function checkAndNotifyEarthquake() {
   var res = request(
     "GET",
     "https://icd.who.int/browse11/l-m/en/JsonGetRootConcepts?useHtml=false"
@@ -23,7 +22,7 @@ function checkAndNotifyEarthquake() {
   });
 
   console.log("\n\n\n\n\n\n\n\n Completed");
-}
+} */
 app.listen(process.env.PORT || 3001);
 subCategory();
 
@@ -44,15 +43,16 @@ function subCategory() {
       getDetails(element);
     }
   });
-  console.log("\n\n\n\n\n\n\n\n Completed");
+  console.log("\n\n\n\n\n\n\n\n Completed Item's Found" + address.length);
 }
 
 function subSubCategory(element) {
-  var url =
+  var res = request(
+    "GET",
     "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-    element.ID +
-    "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false";
-  var res = request("GET", url);
+      element.ID +
+      "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
+  );
   var response = JSON.parse(res.getBody().toString());
   response.forEach((element) => {
     if (!element.isLeaf) {
@@ -67,11 +67,12 @@ function subSubCategory(element) {
 }
 
 function subSubSubCategory(element) {
-  var url =
+  var res = request(
+    "GET",
     "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-    element.ID +
-    "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false";
-  var res = request("GET", url);
+      element.ID +
+      "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
+  );
   var response = JSON.parse(res.getBody().toString());
   response.forEach((element) => {
     if (!element.isLeaf) {
@@ -85,11 +86,12 @@ function subSubSubCategory(element) {
   });
 }
 function subSubSubSubCategory(element) {
-  var url =
+  var res = request(
+    "GET",
     "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-    element.ID +
-    "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false";
-  var res = request("GET", url);
+      element.ID +
+      "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
+  );
   var response = JSON.parse(res.getBody().toString());
   response.forEach((element) => {
     if (!element.isLeaf) {
@@ -104,11 +106,12 @@ function subSubSubSubCategory(element) {
 }
 
 function subSubSubSubSubCategory(element) {
-  var url =
+  var res = request(
+    "GET",
     "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-    element.ID +
-    "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false";
-  var res = request("GET", url);
+      element.ID +
+      "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
+  );
   var response = JSON.parse(res.getBody().toString());
   response.forEach((element) => {
     if (!element.isLeaf) {
@@ -123,11 +126,12 @@ function subSubSubSubSubCategory(element) {
 }
 
 function subSubSubSubSubSubCategory(element) {
-  var url =
+  var res = request(
+    "GET",
     "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-    element.ID +
-    "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false";
-  var res = request("GET", url);
+      element.ID +
+      "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
+  );
   var response = JSON.parse(res.getBody().toString());
   response.forEach((element) => {
     if (!element.isLeaf) {
@@ -138,11 +142,12 @@ function subSubSubSubSubSubCategory(element) {
   });
 }
 function subSubSubSubSubSubSubCategory(element) {
-  var url =
+  var res = request(
+    "GET",
     "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-    element.ID +
-    "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false";
-  var res = request("GET", url);
+      element.ID +
+      "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
+  );
   var response = JSON.parse(res.getBody().toString());
   response.forEach((element) => {
     if (!element.isLeaf) {
@@ -154,24 +159,12 @@ function subSubSubSubSubSubSubCategory(element) {
 }
 
 function getDetails(element) {
-  fs.appendFileSync(
-    "response.json",
-    ","+JSON.stringify(previousValue),
-    (err) => {
-      if (err) {
-        console.log("Failed");
-        return;
-      }
-      console.log("Inserted");
-    }
-  );
+  address.add(element.ID);
   console.log(count++ + " Record Inserted");
+  /* console.log(count++ + " Record Inserted");
   var mItem = {};
-  var url =
-    "https://icd.who.int/browse11/l-m/en/GetConcept?ConceptId=" + element.ID;
-  var res = request("GET", url);
-  var response = res.getBody().toString();
-  const dom = new JSDOM(response);
+  var res = request("GET", "https://icd.who.int/browse11/l-m/en/GetConcept?ConceptId=" + element.ID);
+  const dom = new JSDOM( res.getBody().toString());
 
   var defination = Array.from(
     dom.window.document.getElementsByClassName("definition")
@@ -217,5 +210,15 @@ function getDetails(element) {
   if (mItem.code.substr(0, element.label.indexOf(".")) === "") {
     mItem.DescId = mItem.code;
   }
-  previousValue = mItem;
+  fs.appendFileSync(
+    "response.json",
+    ","+JSON.stringify(mItem),
+    (err) => {
+      if (err) {
+        console.log("Failed");
+        return;
+      }
+      console.log("Inserted");
+    }
+  ); */
 }
