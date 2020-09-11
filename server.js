@@ -10,6 +10,7 @@ const { JSDOM } = jsdom;
 var ArrayList = require("arraylist");
 var address = new ArrayList();
 var count = 1;
+var file=0;
 app.use(bodyParser.urlencoded({ extended: true }));
 /* function checkAndNotifyEarthquake() {
   var res = request(
@@ -36,14 +37,30 @@ function subCategory() {
   response.forEach((element) => {
     if (!element.isLeaf) {
       if (element.averageDepth >= 3) {
-        getDetails(element);
+        address.add(element.id);
+        console.log(count++ +" Items Address To List");
       }
       subSubCategory(element);
+      element = null;
     } else {
-      getDetails(element);
+      address.add(element.id);
+      console.log(count++ +" Items Address To List");
+      element = null;
     }
   });
+  subSubSubSubSubSubSubCategory=null;
+  subSubSubSubSubSubCategory=null;
+  subSubSubSubSubCategory=null;
+  subSubSubSubCategory=null;
+  subSubSubCategory=null;
+  subSubCategory=null;
+  subCategory=null;
   console.log("\n\n\n\n\n\n\n\n Completed Item's Found" + address.length);
+
+  address.forEach(element => {
+    getDetails(element);
+    element=null;
+  });
 }
 
 function subSubCategory(element) {
@@ -53,15 +70,20 @@ function subSubCategory(element) {
       element.ID +
       "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
   );
+  element=null;
   var response = JSON.parse(res.getBody().toString());
   response.forEach((element) => {
     if (!element.isLeaf) {
       if (element.averageDepth >= 3) {
-        getDetails(element);
+        address.add(element.id);
+        console.log(count++ +" Items Address To List");
       }
       subSubSubCategory(element);
+      element = null;
     } else {
-      getDetails(element);
+      address.add(element.id);
+      console.log(count++ +" Items Address To List");
+      element = null;
     }
   });
 }
@@ -73,34 +95,43 @@ function subSubSubCategory(element) {
       element.ID +
       "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
   );
+  element=null;
   var response = JSON.parse(res.getBody().toString());
   response.forEach((element) => {
     if (!element.isLeaf) {
       if (element.averageDepth >= 3) {
-        getDetails(element);
+        address.add(element.id);
+        console.log(count++ +" Items Address To List");
       }
       subSubSubSubCategory(element);
+      element = null;
     } else {
-      getDetails(element);
+      address.add(element.id);
+      console.log(count++ +" Items Address To List");
+      element = null;
     }
   });
 }
 function subSubSubSubCategory(element) {
   var res = request(
     "GET",
-    "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-      element.ID +
+    "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +element.ID +
       "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
   );
+  element=null;
   var response = JSON.parse(res.getBody().toString());
   response.forEach((element) => {
     if (!element.isLeaf) {
       if (element.averageDepth >= 3) {
-        getDetails(element);
+        address.add(element.id);
+        console.log(count++ +" Items Address To List");
       }
       subSubSubSubSubCategory(element);
+      element = null;
     } else {
-      getDetails(element);
+      address.add(element.id);
+      console.log(count++ +" Items Address To List");
+      element = null;
     }
   });
 }
@@ -112,15 +143,20 @@ function subSubSubSubSubCategory(element) {
       element.ID +
       "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
   );
+  element=null;
   var response = JSON.parse(res.getBody().toString());
   response.forEach((element) => {
     if (!element.isLeaf) {
       if (element.averageDepth >= 3) {
-        getDetails(element);
+        address.add(element.id);
+        console.log(count++ +" Items Address To List");
       }
       subSubSubSubSubSubCategory(element);
+      element = null;
     } else {
-      getDetails(element);
+      address.add(element.id);
+      console.log(count++ +" Items Address To List");
+      element = null;
     }
   });
 }
@@ -132,12 +168,15 @@ function subSubSubSubSubSubCategory(element) {
       element.ID +
       "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
   );
+  element=null;
   var response = JSON.parse(res.getBody().toString());
   response.forEach((element) => {
     if (!element.isLeaf) {
       subSubSubSubSubSubSubCategory(element);
     } else {
-      getDetails(element);
+      address.add(element.id);
+      console.log(count++ +" Items Address To List");
+      element = null;
     }
   });
 }
@@ -148,27 +187,36 @@ function subSubSubSubSubSubSubCategory(element) {
       element.ID +
       "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
   );
+  element=null;
   var response = JSON.parse(res.getBody().toString());
   response.forEach((element) => {
     if (!element.isLeaf) {
       subSubSubSubSubSubCategory(element);
     } else {
-      getDetails(element);
+      address.add(element.id);
+      console.log(count++ +" Items Address To List");
+      element = null;
     }
   });
 }
 
 function getDetails(element) {
   address.add(element.ID);
-  console.log(count++ + " Record Inserted");
-  /* console.log(count++ + " Record Inserted");
+  console.log(file++ + " Record Inserted of "+count);
   var mItem = {};
-  var res = request("GET", "https://icd.who.int/browse11/l-m/en/GetConcept?ConceptId=" + element.ID);
+  var res = request("GET", "https://icd.who.int/browse11/l-m/en/GetConcept?ConceptId=" + element);
   const dom = new JSDOM( res.getBody().toString());
-
+  res=null;
   var defination = Array.from(
     dom.window.document.getElementsByClassName("definition")
   );
+  var codingNote = Array.from(
+    dom.window.document.getElementsByClassName("codingnote")
+  );
+  var node = Array.from(
+    dom.window.document.getElementsByClassName("inclusion")
+  );
+  dom=null;
   var item = "";
   for (i = 0; i < defination.length; i++) {
     if (i === 0) {
@@ -179,9 +227,6 @@ function getDetails(element) {
       item += "</ul>";
     }
   }
-  var codingNote = Array.from(
-    dom.window.document.getElementsByClassName("codingnote")
-  );
   for (i = 0; i < codingNote.length; i++) {
     if (i === 0) {
       item += "<p>Coding Note</p><ul>";
@@ -191,9 +236,6 @@ function getDetails(element) {
       item += "</ul>";
     }
   }
-  var node = Array.from(
-    dom.window.document.getElementsByClassName("inclusion")
-  );
   for (i = 0; i < node.length; i++) {
     if (i === 0) {
       item += "<p>Inclusions</p><ul>";
@@ -220,5 +262,6 @@ function getDetails(element) {
       }
       console.log("Inserted");
     }
-  ); */
+  );
+  mItem=null;
 }
