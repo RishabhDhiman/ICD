@@ -30,7 +30,7 @@ subCategory();
 function subCategory() {
   var url =
     "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-    "http://id.who.int/icd/entity/1435254666" +
+    "http://id.who.int/icd/entity/1630407678" +
     "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false";
   var res = request("GET", url);
   var response = JSON.parse(res.getBody().toString());
