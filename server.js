@@ -201,7 +201,6 @@ function subSubSubSubSubSubSubCategory(element) {
 }
 
 function getDetails(element) {
-  address.add(element.ID);
   console.log(file++ + " Record Inserted of "+count);
   var mItem = {};
   var res = request("GET", "https://icd.who.int/browse11/l-m/en/GetConcept?ConceptId=" + element);
