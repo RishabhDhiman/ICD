@@ -25,12 +25,12 @@ function checkAndNotifyEarthquake() {
   console.log("\n\n\n\n\n\n\n\n Completed");
 }
 app.listen(process.env.PORT || 3001);
-checkAndNotifyEarthquake();
+subCategory();
 
-function subCategory(element) {
+function subCategory() {
   var url =
     "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-    element.ID +
+     "http://id.who.int/icd/entity/1435254666" +
     "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false";
   var res = request("GET", url);
   var response = JSON.parse(res.getBody().toString());
