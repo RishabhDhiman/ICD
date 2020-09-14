@@ -24,7 +24,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
   console.log("\n\n\n\n\n\n\n\n Completed");
 } */
-var filNmae = "21 Symptoms, signs or clinical findings, not elsewhere classified.json";
+var filNmae = "23 External causes of morbidity or mortality.json";
 fs.appendFileSync(filNmae, "[", (err) => {
     if (err) {
       console.log("Failed");
@@ -38,7 +38,7 @@ subCategory();
 function subCategory() {
   var url =
     "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-    "http://id.who.int/icd/entity/1843895818" +
+    "http://id.who.int/icd/entity/850137482" +
     "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false";
   var res = request("GET", url);
   var response = JSON.parse(res.getBody().toString());
