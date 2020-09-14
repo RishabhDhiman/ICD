@@ -24,13 +24,21 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
   console.log("\n\n\n\n\n\n\n\n Completed");
 } */
-app.listen(process.env.PORT || 3001);
+var filNmae = "17 Conditions related to sexual health.json";
+fs.appendFileSync(filNmae, "[", (err) => {
+    if (err) {
+      console.log("Failed");
+      return;
+    }
+    console.log("Inserted");
+  });
+app.listen(process.env.PORT || 3003);
 subCategory();
 
 function subCategory() {
   var url =
     "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-    "http://id.who.int/icd/entity/979408586" +
+    "http://id.who.int/icd/entity/577470983" +
     "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false";
   var res = request("GET", url);
   var response = JSON.parse(res.getBody().toString());
@@ -61,6 +69,8 @@ function subCategory() {
     getDetails(element);
     element = null;
   });
+
+  console.log("\n\n\n\n\n\n\n\n Completed Item's Saved" + address.length);
 }
 
 function subSubCategory(element) {
@@ -188,7 +198,6 @@ function subSubSubSubSubSubSubCategory(element) {
       element.ID +
       "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
   );
-  element = null;
   var response = JSON.parse(res.getBody().toString());
   response.forEach((element) => {
     if (!element.isLeaf) {
@@ -206,10 +215,9 @@ function getDetails(element) {
   var mItem = {};
   var res = request(
     "GET",
-    "https://icd.who.int/browse11/l-m/en/GetConcept?ConceptId=" + element
+    "https://icd.who.int/browse11/l-m/en/GetConcept?ConceptId=" + element.ID
   );
   var dom = new JSDOM(res.getBody().toString());
-  res = null;
   var defination = Array.from(
     dom.window.document.getElementsByClassName("definition")
   );
@@ -219,7 +227,6 @@ function getDetails(element) {
   var node = Array.from(
     dom.window.document.getElementsByClassName("inclusion")
   );
-  dom = null;
   var item = "";
   for (i = 0; i < defination.length; i++) {
     if (i === 0) {
@@ -255,12 +262,15 @@ function getDetails(element) {
   if (mItem.code.substr(0, element.label.indexOf(".")) === "") {
     mItem.DescId = mItem.code;
   }
-  fs.appendFileSync("response.json", "," + JSON.stringify(mItem), (err) => {
+  fs.appendFileSync(filNmae, "," + JSON.stringify(mItem), (err) => {
     if (err) {
       console.log("Failed");
       return;
     }
     console.log("Inserted");
   });
+  element = null;
+  dom = null;
+  res = null;
   mItem = null;
 }
