@@ -12,7 +12,7 @@ var finalList = new ArrayList;
 var address = new ArrayList();
 var count = 1;
 var file = 0;
-var node = "V";
+var node = "T";
 app.use(bodyParser.urlencoded({ extended: true }));
 var filNmae = node + ".json";
 fs.appendFileSync(filNmae, "[", (err) => {
