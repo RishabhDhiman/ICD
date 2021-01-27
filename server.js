@@ -8,77 +8,108 @@ app.use(bodyParser.json());
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 var ArrayList = require("arraylist");
+var finalList = new ArrayList;
 var address = new ArrayList();
 var count = 1;
 var file = 0;
+var node = "A";
 app.use(bodyParser.urlencoded({ extended: true }));
-/* function checkAndNotifyEarthquake() {
-  var res = request(
-    "GET",
-    "https://icd.who.int/browse11/l-m/en/JsonGetRootConcepts?useHtml=false"
-  );
-  var response = JSON.parse(res.getBody().toString());
-  response.forEach((element) => {
-    subCategory(element);
-  });
-
-  console.log("\n\n\n\n\n\n\n\n Completed");
-} */
-var filNmae = "X Extension Codes.json";
+var filNmae = node + ".json";
 fs.appendFileSync(filNmae, "[", (err) => {
-    if (err) {
-      console.log("Failed");
-      return;
-    }
-    console.log("Inserted");
-  });
+  if (err) {
+    console.log("Failed");
+    return;
+  }
+  console.log("Inserted");
+});
 app.listen(process.env.PORT || 3003);
 subCategory();
 
 function subCategory() {
-  var url =
-    "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-    "http://id.who.int/icd/entity/979408586" +
-    "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false";
+  var v = 0;
+  var total = 0;
+  var url = "https://www.hcpcsdata.com/Codes/" + node;
   var res = request("GET", url);
-  var response = JSON.parse(res.getBody().toString());
-  response.forEach((element) => {
-    if (!element.isLeaf) {
-      if (element.averageDepth >= 3) {
-        address.add(element);
-        console.log(count++ + " Items Address To List");
+  var response = new JSDOM(res.getBody().toString());
+  var list = Array.from(response.window.document.getElementsByClassName("clickable-row"));
+  total = list.length;
+  list.forEach(item => {
+   var mItem = {};
+    mItem.HCPCSCode = item.cells[0].querySelector("a").textContent;
+    var href = "https://www.hcpcsdata.com" + item.cells[0].querySelector("a").getAttribute("href");
+    var page = request("GET", href);
+    mItem.code = node;
+    var jsdom=(new JSDOM(page.getBody().toString()));
+    mItem.Description = jsdom.window.document.querySelector("h5").textContent;
+    mItem.ShortDescription =jsdom.window.document.querySelector("tbody").getElementsByTagName("tr")[0].getElementsByTagName("td")[1].innerHTML.trim();
+    var betos = -1;
+    var addedOn = -1;
+    var relatedCode = -1;
+    var medicareCoverageStatus = -1;
+    var shortDescription = -1;
+    var tbody = jsdom.window.document.querySelector("tbody").getElementsByTagName("tr");
+    var asd = jsdom.window.document.querySelector("tbody").getElementsByTagName("tr");
+    for (i = 0; i <jsdom.window.document.querySelector("tbody").getElementsByTagName("tr").length; i++) {
+      if (asd[i].getElementsByTagName("td")[0].innerHTML.trim().includes("Short Description")) {
+        shortDescription = i;
       }
-      subSubCategory(element);
-      element = null;
-    } else {
-      address.add(element);
-      console.log(count++ + " Items Address To List");
-      element = null;
+      else if (asd[i].getElementsByTagName("td")[0].innerHTML.trim().includes("HCPCS Code Added Date")) {
+        addedOn = i;
+      }
+
+      else if (asd[i].getElementsByTagName("td")[0].innerHTML.trim().includes("HCPCS Cross Reference Code")) {
+        relatedCode = i;
+      }
+
+      else if (asd[i].getElementsByTagName("td")[0].innerHTML.trim().includes("HCPCS Type Of Service Code")) {
+        betos = i;
+      }
+
+      else if (asd[i].getElementsByTagName("td")[0].innerHTML.trim().includes("HCPCS Coverage Code")) {
+        medicareCoverageStatus = i;
+      }
     }
-  });
-  subSubSubSubSubSubSubCategory = null;
-  subSubSubSubSubSubCategory = null;
-  subSubSubSubSubCategory = null;
-  subSubSubSubCategory = null;
-  subSubSubCategory = null;
-  subSubCategory = null;
-  subCategory = null;
-  console.log("\n\n\n\n\n\n\n\n Completed Item's Found" + address.length);
-
-  address.forEach((element) => {
-    getDetails(element);
-    element = null;
-  });
-
-  console.log("\n\n\n\n\n\n\n\n Completed Item's Saved" + address.length);
+    mItem.CodeDescription = "2020/2021 HCPCS Code " + item.cells[0].querySelector("a").textContent + "\n    \n" + mItem.Description + "\n\n" + "    * Added on: " + (new JSDOM(page.getBody().toString())).window.document.querySelector("tbody").getElementsByTagName("tr")[addedOn].getElementsByTagName("td")[1].innerHTML.trim();
+    if (relatedCode == -1) {
+      //mItem.BETOSClassification = (new JSDOM(page.getBody().toString())).window.document.querySelector("tbody").getElementsByTagName("tr")[8].getElementsByTagName("td")[1].innerHTML.trim();
+      mItem.CodeDescription = mItem.CodeDescription + "\n    * BETOS Classification: " + tbody[betos].getElementsByTagName("td")[1].innerHTML.trim() + "\n    * Medicare coverage status: " + tbody[medicareCoverageStatus].getElementsByTagName("td")[1].innerHTML.trim();
+    }
+    else {
+      //  mItem.BETOSClassification = (new JSDOM(page.getBody().toString())).window.document.querySelector("tbody").getElementsByTagName("tr")[7].getElementsByTagName("td")[1].innerHTML.trim();
+      //mItem.RelatedCodes = 
+      mItem.CodeDescription = mItem.CodeDescription + "\n    * See related codes: " + tbody[relatedCode].getElementsByTagName("td")[1].querySelector("a").innerHTML + "\n    * BETOS Classification: " + tbody[betos].getElementsByTagName("td")[1].innerHTML.trim() + "\n    * Medicare coverage status: " + tbody[medicareCoverageStatus].getElementsByTagName("td")[1].innerHTML.trim();
+    }
+    //mItem.MedicareCoverageStatus = (new JSDOM(page.getBody().toString())).window.document.querySelector("tbody").getElementsByTagName("tr")[1].getElementsByTagName("td")[1].innerHTML.trim();
+    //mItem.AddedOn = (new JSDOM(page.getBody().toString())).window.document.querySelector("tbody").getElementsByTagName("tr")[4].getElementsByTagName("td")[1].innerHTML.trim();
+    fs.appendFileSync(filNmae, "," + JSON.stringify(mItem), "utf-8", (err) => {
+      if (err) {
+        console.log("Failed");
+        return;
+      }
+      console.log("Inserted");
+    });
+    v++;
+    console.log(v + " Item Added of " + total);
+    //finalList.add(mItem);
+    mItem=null;
+    jsdom=null;
+    mItem=null;
+    tbody = null;
+    asd = null;
+    betos = null;
+    addedOn = null;
+    relatedCode = null;
+    medicareCoverageStatus = null;
+    shortDescription = null;
+  }
+  );
 }
-
 function subSubCategory(element) {
   var res = request(
     "GET",
     "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-      element.ID +
-      "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
+    element.ID +
+    "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
   );
   element = null;
   var response = JSON.parse(res.getBody().toString());
@@ -90,118 +121,6 @@ function subSubCategory(element) {
       }
       subSubSubCategory(element);
       element = null;
-    } else {
-      address.add(element);
-      console.log(count++ + " Items Address To List");
-      element = null;
-    }
-  });
-}
-
-function subSubSubCategory(element) {
-  var res = request(
-    "GET",
-    "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-      element.ID +
-      "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
-  );
-  element = null;
-  var response = JSON.parse(res.getBody().toString());
-  response.forEach((element) => {
-    if (!element.isLeaf) {
-      if (element.averageDepth >= 3) {
-        address.add(element);
-        console.log(count++ + " Items Address To List");
-      }
-      subSubSubSubCategory(element);
-      element = null;
-    } else {
-      address.add(element);
-      console.log(count++ + " Items Address To List");
-      element = null;
-    }
-  });
-}
-function subSubSubSubCategory(element) {
-  var res = request(
-    "GET",
-    "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-      element.ID +
-      "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
-  );
-  element = null;
-  var response = JSON.parse(res.getBody().toString());
-  response.forEach((element) => {
-    if (!element.isLeaf) {
-      if (element.averageDepth >= 3) {
-        address.add(element);
-        console.log(count++ + " Items Address To List");
-      }
-      subSubSubSubSubCategory(element);
-      element = null;
-    } else {
-      address.add(element);
-      console.log(count++ + " Items Address To List");
-      element = null;
-    }
-  });
-}
-
-function subSubSubSubSubCategory(element) {
-  var res = request(
-    "GET",
-    "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-      element.ID +
-      "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
-  );
-  element = null;
-  var response = JSON.parse(res.getBody().toString());
-  response.forEach((element) => {
-    if (!element.isLeaf) {
-      if (element.averageDepth >= 3) {
-        address.add(element);
-        console.log(count++ + " Items Address To List");
-      }
-      subSubSubSubSubSubCategory(element);
-      element = null;
-    } else {
-      address.add(element);
-      console.log(count++ + " Items Address To List");
-      element = null;
-    }
-  });
-}
-
-function subSubSubSubSubSubCategory(element) {
-  var res = request(
-    "GET",
-    "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-      element.ID +
-      "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
-  );
-  element = null;
-  var response = JSON.parse(res.getBody().toString());
-  response.forEach((element) => {
-    if (!element.isLeaf) {
-      subSubSubSubSubSubSubCategory(element);
-    } else {
-      address.add(element);
-      console.log(count++ + " Items Address To List");
-      element = null;
-    }
-  });
-}
-function subSubSubSubSubSubSubCategory(element) {
-  var res = request(
-    "GET",
-    "https://icd.who.int/browse11/l-m/en/JsonGetChildrenConcepts?ConceptId=" +
-      element.ID +
-      "&useHtml=false&showAdoptedChildren=true&isAdoptedChild=false"
-  );
-  var response = JSON.parse(res.getBody().toString());
-  response.forEach((element) => {
-    if (!element.isLeaf) {
-      subSubSubSubSubSubCategory(element);
     } else {
       address.add(element);
       console.log(count++ + " Items Address To List");
